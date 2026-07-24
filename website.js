@@ -42,14 +42,14 @@ function displayCurrentPage(){
 async function getProducts() {  //function to display products on page
     const response = await fetch(apiUrl); //using apiUrl to fetch the products and their info for our website in the form of response
     const data = await response.json();  //converting response into javascript objects
-    allProducts = data.products; 
-    displayedProducts = allProducts;
+    allProducts = data.products; //it stores all the products fetched by API not total,skip or limit just products array
+    displayedProducts = allProducts; //allProducts are displayed
     displayCurrentPage(); //calling function to display current page of products
 }
 
 getProducts(); //calling our function getProducts()
 
-function viewProduct(id){ //function for viewing a single product's id after clicking on a that product
+function viewProduct(id){ //function for connecting home page to products details page 
     window.location.href = `product.html?id=${id}`; //opens in a new location on the same tab with the url consisting id
 }
 

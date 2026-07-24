@@ -31,7 +31,7 @@ header > h1{
     padding: 10px;
     font-size: 16px;
     border: 1px solid #ccc;
-    border-radius: 6px;
+    border-radius: 20px;
 }
 
 #productContainer{
@@ -42,6 +42,8 @@ header > h1{
 }
 
 .card{
+    display: flex;
+    flex-direction: column;
     background-color: white;
     border-radius: 10px;
     overflow: hidden;
@@ -49,17 +51,25 @@ header > h1{
     box-shadow: 0 4px 12px rgb(0,0,0,0.1);
 }
 
+.card:hover{
+    border: 1px solid  #666;
+}
+
 .card img{
     width: 100%;
-    height: 220px;
+    height: 200px;
     object-fit: contain;
 }
 
 .card content{
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
     padding: 20px;
 }
 
 .card h2{
+    height: 50px;
     margin-bottom: 10px;
     font-size: 22px;
 }
@@ -85,6 +95,7 @@ header > h1{
     border-radius:6px;
     cursor:pointer;
     font-size:16px;
+    margin-top: auto;
 }
 
 #pagination{
@@ -114,4 +125,14 @@ header > h1{
 #pagination span{
     font-size: 20px;
     font-weight: 600;
+}
+
+#footer {
+    display: flex;
+    flex-direction: column;
+    background-color: #222;
+    color: white;
+    height: 150px;
+    align-items: center;
+    justify-content: center;
 }
