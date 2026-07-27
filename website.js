@@ -37,7 +37,7 @@ function displayCurrentPage(){
     pageNum.textContent = `Page ${currentPage} of ${totalPages}`; //displaying page number using template literals 
     prevBtn.disabled = currentPage === 1; //disabling back button if current page no. is 1
     nextBtn.disabled = currentPage === totalPages; //disabling next button if we are on last page
-} //function used to display current page 
+} //function used to display current page with 9 products only.
 
 async function getProducts() {  //function to display products on page
     const response = await fetch(apiUrl); //using apiUrl to fetch the products and their info for our website in the form of response
