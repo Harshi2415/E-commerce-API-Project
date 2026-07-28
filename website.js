@@ -1,18 +1,46 @@
-const apiUrl = "https://dummyjson.com/products"; //This is our API URL
-const productContainer = document.getElementById("productContainer"); //imp for dynamic product adding in html using js
-const searchInput = document.getElementById("searchInput"); //getting the search button work 
-let allProducts = []; //array which consists of all products on our website
-let displayedProducts = []; //array which consist only the products displaying on screen
-let currentPage = 1; // setting default value of current page in pagination
-const productsPerPage = 9; //as fo rour website we want to display only 9 products per page 
-const nextBtn = document.getElementById("nextBtn"); //next btn in pagination
-const prevBtn = document.getElementById("prevBtn"); //back btn in pagination
-const pageNum = document.getElementById("pageNum"); //Page numbers in pagination
+const apiUrl = "https://dummyjson.com/products"; 
+const productContainer = document.getElementById("productContainer"); 
+const searchInput = document.getElementById("searchInput");
+const categoryFilter = document.getElementById("categoryFilter");
+let selectedCategory = "";
+const overlay = document.getElementById("overlay");
+const sidebar = document.getElementById("productSidebar");
+const closeSidebar = document.getElementById("closeSidebar");
+const sidebarImage = document.getElementById("sidebarImage");
+const sidebarTitle = document.getElementById("sidebarTitle");
+const sidebarPrice = document.getElementById("sidebarPrice");
+const sidebarCategory = document.getElementById("sidebarCategory");
+const sidebarBrand = document.getElementById("sidebarBrand");
+const sidebarStock = document.getElementById("sidebarStock");
+const sidebarRating = document.getElementById("sidebarRating");
+const sidebarDescription = document.getElementById("sidebarDescription");
+let currentPage = 1; 
+const productsPerPage = 9; 
+let totalProducts = 0;
+let searchText = "";
+const nextBtn = document.getElementById("nextBtn"); 
+const prevBtn = document.getElementById("prevBtn"); 
+const pageNum = document.getElementById("pageNum"); 
+
+async function loadCategories(){
+    const response = await fetch (`${apiUrl}/categories`);
+    const categories = await response.json();
+    categories.forEach(function(category){
+        categoryFilter.innerHTML +=
+        `<option value="${category.slug}">
+            ${category.name}
+        </option>`;
+    });
+}
 
 function displayProducts(products){ 
-    productContainer.innerHTML = ""; //to make our screen empty before displaying products according to our need 
-    products.forEach(function(product){ //loop for creating cards for each product
-       productContainer.innerHTML += //+= creates and adds product cards to the page 
+    productContainer.innerHTML = "";
+    if (products.length === 0) {
+        productContainer.innerHTML = "<h2>No products found.</h2>";
+        return;
+    }
+    products.forEach(function(product){ 
+       productContainer.innerHTML += 
        `<div class="card"> 
         <img src = "${product.thumbnail}" alt="${product.title}"></img>
         <div class="card-content">
@@ -23,61 +51,96 @@ function displayProducts(products){
                View details
             </button>
         </div>
-       </div>` //we've used template literals for displaying info on card
+       </div>` 
     });
-} //function used to display products according to the need like allProducts/filteredproducts/etc
-
-function displayCurrentPage(){
-    const startIndex = (currentPage - 1) * productsPerPage; //calculating startIndex for our products
-    const endIndex = startIndex + productsPerPage; //calculating endIndex for our products on one page 
-    const pageProducts = displayedProducts.slice(startIndex, endIndex); //assigning 9 products according to index to display on page
-    displayProducts(pageProducts); //display only 9 products per page as default 
-    
-    const totalPages = Math.ceil(displayedProducts.length / productsPerPage);//calculating total no. of pages for products
-    pageNum.textContent = `Page ${currentPage} of ${totalPages}`; //displaying page number using template literals 
-    prevBtn.disabled = currentPage === 1; //disabling back button if current page no. is 1
-    nextBtn.disabled = currentPage === totalPages; //disabling next button if we are on last page
-} //function used to display current page with 9 products only.
-
-async function getProducts() {  //function to display products on page
-    const response = await fetch(apiUrl); //using apiUrl to fetch the products and their info for our website in the form of response
-    const data = await response.json();  //converting response into javascript objects
-    allProducts = data.products; //it stores all the products fetched by API not total,skip or limit just products array
-    displayedProducts = allProducts; //allProducts are displayed
-    displayCurrentPage(); //calling function to display current page of products
 }
 
-getProducts(); //calling our function getProducts()
+function updatePagination(){
+    const totalPages = Math.ceil(totalProducts/productsPerPage);
+    pageNum.textContent = `Page ${currentPage} of ${totalPages}`;
+    prevBtn.disabled = currentPage === 1;
+    nextBtn.disabled = currentPage === totalPages;
+} 
 
-function viewProduct(id){ //function for connecting home page to products details page 
-    window.location.href = `product.html?id=${id}`; //opens in a new location on the same tab with the url consisting id
+async function getProducts(page = 1){
+    const skip = (page-1)*productsPerPage;
+    let url;
+    if (selectedCategory !== "") {
+        url =`${apiUrl}/category/${selectedCategory}?limit=${productsPerPage}&skip=${skip}`;
+    }else if (searchText !== "") {
+        url =`${apiUrl}/search?q=${searchText}&limit=${productsPerPage}&skip=${skip}`;
+    }else {
+        url =`${apiUrl}?limit=${productsPerPage}&skip=${skip}`;
+    }
+    const response = await fetch(url);
+    const data = await response.json();
+    totalProducts = data.total;
+    displayProducts(data.products);
+    updatePagination();
+}
+getProducts(); 
+loadCategories();
+checkURL();
+
+async function viewProduct(id){
+    const response = await fetch(`${apiUrl}/${id}`);
+    const product = await response.json();
+    sidebarImage.src = product.thumbnail;
+    sidebarTitle.textContent = product.title;
+    sidebarPrice.innerHTML = `<strong>Price:</strong> $${product.price}`;
+    sidebarCategory.innerHTML = `<strong>Category:</strong> ${product.category}`;
+    sidebarBrand.innerHTML = `<strong>Brand:</strong> ${product.brand}`;
+    sidebarStock.innerHTML = `<strong>Stock:</strong> ${product.stock}`;
+    sidebarRating.innerHTML = `⭐ <strong>Rating:</strong> ${product.rating}`;
+    sidebarDescription.innerHTML = `<strong>Description:</strong><br>${product.description}`;
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
+    history.pushState({}, "", `?id=${id}`);
 }
 
-searchInput.addEventListener("input",function(){ //event listener used for search bar working
-    const searchText = searchInput.value.trim(); //getting trigger by the user input value and also trimming the blank space
-    const filteredProducts = allProducts.filter(function(product){ //function for displaying filtered products only 
-       return (
-        product.title.toLowerCase().includes(searchText.toLowerCase())||
-        product.category.toLowerCase().includes(searchText.toLowerCase())
-     ); //returns result by converting user text into lowercase as js is case-insensitive and using include() to check weather the products containg same spelling as of searchText
-    });
-
-    displayedProducts = filteredProducts; //array displayed products contains only filtered products
-    currentPage = 1; //setting default value for the current page of the filtered products after search
-    displayCurrentPage(); //displaying the pages for the products which are result of search 
+closeSidebar.addEventListener("click", function(){
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+    history.pushState({}, "", "index.html");
 });
 
-nextBtn.addEventListener("click", function() {
-    const totalPages = Math.ceil(displayedProducts.length/ productsPerPage);
+overlay.addEventListener("click", function(){
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
+    history.pushState({}, "", "index.html");
+});
+
+function checkURL(){
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if(id){
+        viewProduct(id);
+    }
+}
+
+categoryFilter.addEventListener("change", function(){
+    selectedCategory = categoryFilter.value;
+    currentPage = 1;
+    getProducts(currentPage);
+});
+
+searchInput.addEventListener("input",function(){
+    searchText = searchInput.value.trim();
+    currentPage = 1;
+    getProducts(currentPage);
+});
+
+nextBtn.addEventListener("click",function(){
+    const totalPages = Math.ceil(totalProducts/productsPerPage);
     if(currentPage < totalPages){
         currentPage++;
-        displayCurrentPage();
+        getProducts(currentPage);
     }
-}); //function for the next button 
+}); 
 
 prevBtn.addEventListener("click", function () {
     if(currentPage > 1){
         currentPage--;
-        displayCurrentPage();
+        getProducts(currentPage);
     }
-});//function for the back button
+});
