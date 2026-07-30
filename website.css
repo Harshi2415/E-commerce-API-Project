@@ -59,18 +59,19 @@ header > h1{
 }
 
 #productSidebar{
-    width: 0;
+    display: none;
+    width: 380px;
+    padding: 25px;
     margin-top: 100px;
     background: white;
     box-shadow: -5px 0 15px rgba(0,0,0,0.2);
-    overflow: hidden;
-    padding: 0;
     transition: width 0.4s ease, padding 0.4s ease;
     flex-shrink: 0;
     border-left: 1px solid #ddd;
 }
 
 #productSidebar.active{
+    display: block;
     width: 380px;
     padding: 25px;
 }
