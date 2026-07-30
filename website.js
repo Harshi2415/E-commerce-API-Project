@@ -103,21 +103,20 @@ async function viewProduct(id){
     sidebarRating.innerHTML = `⭐ <strong>Rating:</strong> ${product.rating}`;
     sidebarDescription.innerHTML = `<strong>Description:</strong><br>${product.description}`;
     sidebar.classList.add("active");
-    overlay.classList.add("active");
+    document.querySelector(".content-wrapper").classList.add("sidebar-open");
     history.pushState({}, "", `?id=${id}`);
 } //function to display sidebar when a product is clicked using id
 
 closeSidebar.addEventListener("click", function(){
     sidebar.classList.remove("active");
-    overlay.classList.remove("active");
+    document.querySelector(".content-wrapper").classList.remove("sidebar-open");
     history.pushState({}, "", "index.html");
 }); //function for working of close button 
 
-overlay.addEventListener("click", function(){
+window.addEventListener("popstate", function(){
     sidebar.classList.remove("active");
-    overlay.classList.remove("active");
-    history.pushState({}, "", "index.html");
-}); //function for overlay to close the sidebar when clicking outside the sidebar 
+    document.querySelector(".content-wrapper").classList.remove("sidebar-open");
+}); //Function to close the sidebar
 
 categoryFilter.addEventListener("change", function(){
     selectedCategory = categoryFilter.value;
